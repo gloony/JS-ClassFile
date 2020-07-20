@@ -4,28 +4,84 @@ var _timer = function(name){
 		name = 'auto' + _timer.autoID;
 	}
 	function timerObject(name){
-		this.name			= name;
+		this.name				= name;
+		if(_timer.db[this.name]!==undefined){
+			this.pid			= undefined;
+			if(_timer.db[this.name].pid!==undefined) this.pid = _timer.db[this.name].pid;
+			this.proc			= _timer.db[this.name].proc;
+			this.type			= _timer.db[this.name].type;
+			this.seconds		= _timer.db[this.name].seconds;
+		}else{
+			this.pid			= undefined;
+			this.proc			= undefined;
+			this.type			= undefined;
+			this.seconds		= 1;
+		}
+		this.destroy		= function(){
+			if(_timer.db[this.name]!==undefined&&_timer.db[this.name].pid!==undefined) clearTimeout(_timer.db[this.name].pid);
+			delete(_timer.db[this.name]);
+		};
 		this.delay			= function(fn, delay){
-			if(delay===undefined) delay = 1000;
-			if(_timer.dataBase[this.name]!==undefined) clearTimeout(_timer.dataBase[this.name]);
-			_timer.dataBase[this.name] = setTimeout(fn.bind(timerObject(this.name)), delay);
+			if(delay===undefined){
+				if(_timer.db[this.name]!==undefined&&_timer.db[this.name].seconds!==undefined) delay = _timer.db[this.name].seconds;
+				else delay = 1;
+			}
+			if(_timer.db[this.name]!==undefined&&_timer.db[this.name].pid!==undefined) clearTimeout(_timer.db[this.name].pid);
+			var self = this;
+			_timer.db[this.name] = {
+				type: 'delay',
+				proc: fn,
+				seconds: delay
+			};
+			this.proc			= _timer.db[this.name].proc;
+			this.type			= _timer.db[this.name].type;
+			this.seconds		= _timer.db[this.name].seconds;
+			_timer.db[this.name].pid = setTimeout(function(){
+				delete(_timer.db[self.name].pid);
+				_timer.db[self.name].proc.bind(_timer(self.name))();
+				}, delay * 1000);
 			return this;
 		};
 		this.interval		= function(fn, delay){
-			if(delay===undefined) delay = 1000;
-			if(_timer.dataBase[this.name]!==undefined) clearTimeout(_timer.dataBase[this.name]);
-			_timer.dataBase[this.name] = setInterval(fn.bind(timerObject(this.name)), delay);
+			if(delay===undefined){
+				if(_timer.db[this.name]!==undefined&&_timer.db[this.name].seconds!==undefined) delay = _timer.db[this.name].seconds;
+				else delay = 1;
+			}
+			if(_timer.db[this.name]!==undefined&&_timer.db[this.name].pid!==undefined) clearTimeout(_timer.db[this.name].pid);
+			var self = this;
+			_timer.db[this.name] = {
+				type: 'interval',
+				proc: fn,
+				seconds: delay
+			};
+			this.proc			= _timer.db[this.name].proc;
+			this.type			= _timer.db[this.name].type;
+			this.seconds		= _timer.db[this.name].seconds;
+			_timer.db[this.name].pid = setInterval(_timer.db[self.name].proc.bind(timerObject(self.name)), delay * 1000);
+			return this;
+		};
+		this.start			= function(){
+			if(_timer.db[this.name]!==undefined&&_timer.db[this.name].pid!==undefined) clearTimeout(_timer.db[this.name].pid);
+			var self = this;
+			if(_timer.db[this.name].type=='delay'){
+				_timer.db[self.name].pid = setTimeout(function(){
+					delete(_timer.db[self.name].pid);
+					_timer.db[self.name].proc.bind(_timer(self.name))();
+					}, _timer.db[self.name].seconds * 1000);
+			}else if(_timer.db[this.name].type=='interval'){
+				_timer.db[this.name].pid = setInterval(_timer.db[self.name].proc.bind(timerObject(self.name)), _timer.db[self.name].seconds * 1000);
+			}
 			return this;
 		};
 		this.stop			= function(){
-			clearTimeout(_timer.dataBase[this.name]);
-			_timer.dataBase[this.name] = undefined;
+			if(_timer.db[this.name]!==undefined&&_timer.db[this.name].pid!==undefined) clearTimeout(_timer.db[this.name].pid);
+			delete(_timer.db[this.name].pid);
 			return this;
 		};
 	}
 	return new timerObject(name);
 };
-_timer.dataBase	= [];
+_timer.db 		= {};
 _timer.autoID	= -1;
 _timer.delay	= function(fn, delay){ return _timer().delay(fn, delay); };
 _timer.interval	= function(fn, delay){ return _timer().interval(fn, delay); };
