@@ -95,9 +95,6 @@ _timer.sleep	= function(delay){
 	return this;
 };
 _timer.stop		= function(){
-	for(var key in _timer.dataBase){
-		clearTimeout(_timer.dataBase[key]);
-		_timer.dataBase[key] = undefined;
-	}
+	for(var key in _timer.db) _timer(key).stop();
 };
 _timer.now		= function(){ return new Date().getTime(); };
