@@ -77,8 +77,8 @@ var _timer = function(name){
 			if(_timer.db[this.name]!==undefined&&_timer.db[this.name].pid!==undefined){
                 if(_timer.db[this.name].type=='delay') clearTimeout(_timer.db[this.name].pid);
                 else if(_timer.db[this.name].type=='interval') clearInterval(_timer.db[this.name].pid);
-            }
 			delete(_timer.db[this.name].pid);
+            }
 			return this;
 		};
 	}
