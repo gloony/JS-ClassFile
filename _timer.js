@@ -18,7 +18,7 @@ var _timer = function(name){
 			this.seconds		= 1;
 		}
 		this.destroy		= function(){
-			if(_timer.db[this.name]!==undefined&&_timer.db[this.name].pid!==undefined) clearTimeout(_timer.db[this.name].pid);
+			this.stop();
 			delete(_timer.db[this.name]);
 		};
 		this.delay			= function(fn, delay){
@@ -26,7 +26,7 @@ var _timer = function(name){
 				if(_timer.db[this.name]!==undefined&&_timer.db[this.name].seconds!==undefined) delay = _timer.db[this.name].seconds;
 				else delay = 1;
 			}
-			if(_timer.db[this.name]!==undefined&&_timer.db[this.name].pid!==undefined) clearTimeout(_timer.db[this.name].pid);
+			this.stop();
 			var self = this;
 			_timer.db[this.name] = {
 				type: 'delay',
@@ -47,7 +47,7 @@ var _timer = function(name){
 				if(_timer.db[this.name]!==undefined&&_timer.db[this.name].seconds!==undefined) delay = _timer.db[this.name].seconds;
 				else delay = 1;
 			}
-			if(_timer.db[this.name]!==undefined&&_timer.db[this.name].pid!==undefined) clearTimeout(_timer.db[this.name].pid);
+			this.stop();
 			var self = this;
 			_timer.db[this.name] = {
 				type: 'interval',
@@ -61,7 +61,7 @@ var _timer = function(name){
 			return this;
 		};
 		this.start			= function(){
-			if(_timer.db[this.name]!==undefined&&_timer.db[this.name].pid!==undefined) clearTimeout(_timer.db[this.name].pid);
+			this.stop();
 			var self = this;
 			if(_timer.db[this.name].type=='delay'){
 				_timer.db[self.name].pid = setTimeout(function(){
@@ -74,7 +74,10 @@ var _timer = function(name){
 			return this;
 		};
 		this.stop			= function(){
-			if(_timer.db[this.name]!==undefined&&_timer.db[this.name].pid!==undefined) clearTimeout(_timer.db[this.name].pid);
+			if(_timer.db[this.name]!==undefined&&_timer.db[this.name].pid!==undefined){
+                if(_timer.db[this.name].type=='delay') clearTimeout(_timer.db[this.name].pid);
+                else if(_timer.db[this.name].type=='interval') clearInterval(_timer.db[this.name].pid);
+            }
 			delete(_timer.db[this.name].pid);
 			return this;
 		};
