@@ -21,7 +21,7 @@ var _string = function(source){
 		};
 		this.iRight			= function(search){
 			var bool = source.indexOf(search, source.length - search.length) !== -1;
-			if(bool)	_string.iRightLast = source.substr(0, source.lenght - search.lenght);
+			if(bool)	_string.iRightLast = source.substr(0, source.length - search.length);
 			else		_string.iRightLast = null;
 			return bool;
 		};
